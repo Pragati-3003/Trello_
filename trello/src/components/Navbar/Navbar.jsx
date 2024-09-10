@@ -1,58 +1,74 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faCaretRight, faCircleInfo, faCaretDown, faMagnifyingGlass, faBell, faUser } from '@fortawesome/free-solid-svg-icons';
-import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { useDispatch, useSelector } from 'react-redux'
-import { addBoard, setActiveBoard } from '../../store/boardSlice'
+import { useDispatch, useSelector } from 'react-redux';
+import { addBoard, setActiveBoard } from '../../store/boardSlice';
+import { useNavigate } from 'react-router';
+
 const Navbar = () => {
     const [isDropdownVisible, setDropdownVisible] = useState(false);
     const [visibleSublist, setVisibleSublist] = useState(null);
     const [showPop, setShowPop] = useState(false);
     const [boardName, setBoardName] = useState('');
     const [boardColor, setBoardColor] = useState('');
-    
+    const navigate = useNavigate();
+
     const toggleDropdown = () => {
         setDropdownVisible(!isDropdownVisible);
-    }
+    };
 
     const toggleSublist = (listName) => {
         setVisibleSublist(visibleSublist === listName ? null : listName);
-    }
+    };
 
-  
     const dispatch = useDispatch();
-    const boards = useSelector(state => state.boardSlice.boards)
-    const activeBoardId = useSelector(state => state.boardSlice.activeBoardId)
-    const activeBoard = boards.find(board => board.id === activeBoardId)
+    const boards = useSelector(state => state.boardSlice.boards);
+    const activeBoardId = useSelector(state => state.boardSlice.activeBoardId);
+    const activeBoard = boards.find(board => board.id === activeBoardId);
 
-    const handleCreateBoard = async(e) => {
+    const handleCreateBoard = async (e) => {
         e.preventDefault();
-        try {
-          await axios.post('http://localhost:8000/api/boards', {
-            name: boardName,
-            color: boardColor
-          })
-          setBoardName('');
-          setBoardColor('');
-          setShowPop(false);
-          console.log("Board created successfully");
-    
-        } catch (err) {
-          console.error("Error creating board", err);
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('No token found');
+            return;
         }
-    
-    }
+
+        try {
+            await axios.post('http://localhost:8000/api/boards', {
+                name: boardName,
+                color: boardColor
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setBoardName('');
+            setBoardColor('');
+            setShowPop(false);
+            console.log("Board created successfully");
+        } catch (err) {
+            console.error("Error creating board", err);
+        }
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+       
+        navigate('/login');
+         window.location.reload();
+    };
+
     return (
         <div className='w-full z-10 relative text-gray-300 bg-[#1d2125] '>
             <div className='border-b border-[#2f343b] h-14 w-full flex items-center justify-between p-4'>
-                {/* left side */}
+
                 <div className='flex items-center'>
-                    {/* logo */}
+
                     <div>
                         <h1 className='font-sans tracking-widest text-xl font-bold text-gray-300'>Trello</h1>
                     </div>
-                    {/* more */}
                     <ul className=' relative hidden md:flex space-x-4 ml-8 z-30'>
                         <li className=' z-30 decoration-transparent font-semibold hover:underline cursor-pointer' onClick={() => toggleSublist('Workshop')}>
                             Workshop <FontAwesomeIcon icon={faCaretDown} />
@@ -95,12 +111,9 @@ const Navbar = () => {
                         <button onClick={() => setShowPop(!showPop)} className='h-9 w-20 ml-4 bg-blue-600 text-white rounded-md'>Create</button>
                     </div>
                     {showPop && (
-                        <form onSubmit={handleCreateBoard} 
-                        className='bg-black mt-52 p-3 text-gray-200 rounded-md '>
+                        <form onSubmit={handleCreateBoard} className='bg-black mt-52 p-3 text-gray-200 rounded-md '>
                             <div className='mb-2 '>
-                                <label htmlFor='boardName'
-                                 className='block text-sm font-medium
-                                  text-gray-400'>Board Name</label>
+                                <label htmlFor='boardName' className='block text-sm font-medium text-gray-400'>Board Name</label>
                                 <input
                                     type='text'
                                     id='boardName'
@@ -121,7 +134,7 @@ const Navbar = () => {
                                     required
                                 />
                             </div>
-                            <button onClick={() => setShowPop(!showPop)} className='mt-2 p-2 hover:bg-zinc-700   rounded-md'>Cancel</button>
+                            <button onClick={() => setShowPop(!showPop)} className='mt-2 p-2 hover:bg-zinc-700 rounded-md'>Cancel</button>
                             <button type='submit' className='mt-2 p-2 bg-blue-500 text-white rounded-md'>Save</button>
                         </form>
                     )}
@@ -201,7 +214,7 @@ const Navbar = () => {
                                         required
                                     />
                                 </div>
-                                <button onClick={() => setShowPop(!showPop)} className='mt-2 p-2 hover:bg-zinc-700   rounded-md'>Cancel</button>
+                                <button onClick={() => setShowPop(!showPop)} className='mt-2 p-2 hover:bg-zinc-700 rounded-md'>Cancel</button>
                                 <button type='submit' className='mt-2 p-2 bg-blue-500 text-white rounded-md'>Save</button>
                             </form>
                         )}
@@ -214,11 +227,16 @@ const Navbar = () => {
                         <li><FontAwesomeIcon icon={faBell} /></li>
                         <li><FontAwesomeIcon icon={faCircleInfo} /></li>
                         <li><FontAwesomeIcon icon={faUser} /></li>
+                        <li>
+                            <button onClick={handleLogout} className='text-white font-bold'>
+                                Logout
+                            </button>
+                        </li>
                     </ul>
                 </div>
             </div>
         </div>
     );
-}
+};
 
 export default Navbar;

@@ -14,15 +14,32 @@ const AddNew = ({ type, parentId }) => {
       forminput.current.focus();
       return;
     }
+ 
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
+
+
     try {
       if (type) {
         const res = await axios.post('http://localhost:8000/api/cards',
-          { name: inputValue, listId: parentId, boardId: activeBoardId })
+          { name: inputValue, listId: parentId, boardId: activeBoardId },{
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          })
         setInputValue("");
         setIsFormVisible(!isFormVisible)
       } else {
         const res = await axios.post('http://localhost:8000/api/lists',
-          { name: inputValue, boardId: activeBoardId })
+          { name: inputValue, boardId: activeBoardId },{
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          })
         setInputValue("");
         setIsFormVisible(!isFormVisible)
       }

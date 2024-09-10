@@ -3,6 +3,7 @@ import { MoreHorizontal, UserPlus, Edit2 } from 'react-feather'
 import { useDispatch, useSelector } from 'react-redux'
 import { updateBoard } from '../../store/boardSlice'
 import axios from 'axios'
+
 const Filter = () => {
   const dispatch = useDispatch();
   const activeBoardId = useSelector(state => state.boardSlice.activeBoardId);
@@ -12,9 +13,19 @@ const Filter = () => {
   
   useEffect(()=>{
     const fetchBoard=async()=>{
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+
          try{
-              const response = await axios.get(`http://localhost:8000/api/boards`);
-              const currentBoard = response.data.find(board => board._id === activeBoardId);
+          const response = await axios.get(`http://localhost:8000/api/boards`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+           const currentBoard = response.data.find(board => board._id === activeBoardId);
               setActiveBoard(currentBoard);
               setName(currentBoard.name);
          }catch(err){
@@ -25,10 +36,27 @@ const Filter = () => {
   },[])
 
   useEffect(() => {
-    if (activeBoard) {
-      setName(activeBoard.name);
+    const updateBoardName =async()=>{
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+      if (activeBoard) {
+    
+        const response = await axios.put(`http://localhost:8000/api/boards/${activeBoardId}`, {
+          name: name
+        }, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+       console.log(response.data);
+           setName(activeBoard.name);
     }
-  }, [activeBoard]);
+    }
+    updateBoardName()
+  }, [activeBoard,setName]);
 
   const handleNameClick = () => {
     setIsEditing(true);

@@ -15,8 +15,19 @@ const List = () => {
 
   useEffect(() => {
     const fetchlists = async () => {
+      
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
+
       try {
-        const response = await axios.get(`http://localhost:8000/api/lists/${activeBoardId}`)
+        const response = await axios.get(`http://localhost:8000/api/lists/${activeBoardId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         setBoardLists(response.data)
       } catch (error) {
         console.log('error fetching lists', error)
@@ -26,8 +37,18 @@ const List = () => {
   }, [boardLists])
 
   const handleCopyList = async (listId) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
+
     try {
-      const response = await axios.post(`http://localhost:8000/api/lists/${listId}`)
+      const response = await axios.post(`http://localhost:8000/api/lists/${listId}`, {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       setBoardLists([...boardLists, response.data]);
       setShowOptions(null)
     } catch (err) {
@@ -36,10 +57,19 @@ const List = () => {
   };
 
   const handleDeleteList = async (listId) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
     if (window.confirm("Are you sure you want to delete this board?")) {
       try {
-        const response = await axios.delete(`http://localhost:8000/api/lists/${listId}`)
-        console.log('list deleted', response.data);
+        const response = await axios.delete(`http://localhost:8000/api/lists/${listId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+         console.log('list deleted', response.data);
         setBoardLists(boardLists.filter(list => list._id !== listId));
         setShowDeleteConfirmation(false);
         setShowOptions(null);
@@ -60,8 +90,17 @@ const List = () => {
   };
 
   const handleListNameUpdate = async (listId) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
     try {
-      const response = await axios.put(`http://localhost:8000/api/lists/${listId}`, { name: newListName })
+      const response = await axios.put(`http://localhost:8000/api/lists/${listId}`, { name: newListName }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       console.log('list name updated', response.data);
       setBoardLists(boardLists.map(list => list._id === listId ? { ...list, name: newListName } : list));
       setEditingListId(null);

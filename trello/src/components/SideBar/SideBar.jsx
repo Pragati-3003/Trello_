@@ -3,6 +3,7 @@ import { ChevronRight, X, ChevronLeft, Plus } from 'react-feather';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveBoard } from '../../store/boardSlice';
 import axios from 'axios';
+
 const SideBar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [showPop, setShowPop] = useState(false);
@@ -16,8 +17,17 @@ const SideBar = () => {
 
   useEffect(() => {
     const fetchBoards = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
       try {
-        const response = await axios.get('http://localhost:8000/api/boards');
+        const response = await axios.get('http://localhost:8000/api/boards',{
+          headers: {
+            'Authorization' : `Bearer ${token}`
+          }
+        });
         setBoards(response.data);
       } catch (err) {
         console.error("Error fetching boards", err);
@@ -39,18 +49,26 @@ const SideBar = () => {
 
   const handleUpdateBoard = async (e, boardId) => {
     e.preventDefault();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
     try {
       await axios.put(`http://localhost:8000/api/boards/${boardId}`, {
         name: boardName,
         color: boardColor
+      },{
+        headers: {
+          'Authorization' : `Bearer ${token}`
+        }
       })
       setBoards((Boards) => {
         return Boards.map((board) => {
           return board._id === boardId ? { ...board, name: boardName, color: boardColor } : board
         })
       })
-      console.log("Board updated successfully");
-
+      // console.log("Board updated successfully");
       setSelectedBoard(null);
     } catch (err) {
       console.error("Error updating board", err);
@@ -59,10 +77,19 @@ const SideBar = () => {
 
   const handleCreateBoard = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
     try {
       await axios.post('http://localhost:8000/api/boards', {
         name: boardName,
         color: boardColor || '#0079bf'
+      },{
+        headers: {
+          'Authorization' : `Bearer ${token}`
+        }
       })
       setBoards([...boards, { name: boardName, color: boardColor }])
       setBoardName('');
@@ -76,9 +103,18 @@ const SideBar = () => {
   };
 
   const handleDeleteBoard = async (boardId) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
     try {
     if (window.confirm("Are you sure you want to delete this board?")) {
-        await axios.delete(`http://localhost:8000/api/boards/${boardId}`)
+        await axios.delete(`http://localhost:8000/api/boards/${boardId}`,{
+          headers: {
+            'Authorization' : `Bearer ${token}`
+          }
+        })
         setBoards((Boards) => {
           return Boards.filter((board) => {
             return board._id !== boardId
@@ -92,17 +128,27 @@ const SideBar = () => {
     }
   };
   const handleCopyBoard = async (board) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
+  
     try {
-      const response = await axios.post(`http://localhost:8000/api/boards/${board._id}`
-      )
+      const response = await axios.post(`http://localhost:8000/api/boards/${board._id}`, {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       setBoards((prevBoards) => [...prevBoards, response.data]);
       setOptionsVisible(null);
       console.log("Board copied successfully");
-      
     } catch (err) {
-      console.error("Error copying board", err)
+      console.error("Error copying board", err);
     }
-  }
+  };
+
+
   return (
     <div 
     style={{scrollbarColor: '#4B5563 #1F2937' }}

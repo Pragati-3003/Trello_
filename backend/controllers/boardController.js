@@ -1,72 +1,72 @@
 import Board from '../models/Board.js';
 import List from '../models/List.js';
 import Card from '../models/Card.js';
+import User from '../models/User.js';
 
 // @desc  Create boards
 const createBoard = async (req, res) => {
     try {
+        const userId = req.user._id;
         const board = new Board({
             name: req.body.name,
-            color: req.body?.color
-        })
+            color: req.body?.color,
+            user: userId
+        });
         const createdBoard = await board.save();
+        await User.findByIdAndUpdate(userId, { $push: { boards: createdBoard._id } });
         res.status(201).json(createdBoard);
-
     } catch (err) {
-        console.log(err)
-        res.status(500).json({ message: "Server Error" })
-
+        console.log(err);
+        res.status(500).json({ message: "Server Error" });
     }
-}
+};
 
-// @desc    Get all Boards 
+// @desc    Get all Boards for a specific user
 const getAllBoards = async (req, res) => {
     try {
-        const boards = await Board.find();
+        const userId = req.user._id;
+        const boards = await Board.find({ user: userId });
         res.status(200).json(boards);
-
     } catch (err) {
-        console.log(err)
-        res.status(500).json({ message: "Server Error" })
+        console.log(err);
+        res.status(500).json({ message: "Server Error" });
     }
-}
+};
 
 // @desc  Get a Board by ID
 const getBoardById = async (req, res) => {
     try {
-        const board = await Board.findById(req.params.id)
+        const board = await Board.findById(req.params.id);
         if (board) {
-            res.status(200).json(board)
+            res.status(200).json(board);
         } else {
-            res.status(404).json({ message: "Board not found" })
+            res.status(404).json({ message: "Board not found" });
         }
-
     } catch (err) {
-        console.log(err)
-        res.status(500).json({ message: "Server Error" })
+        console.log(err);
+        res.status(500).json({ message: "Server Error" });
     }
-}
+};
 
 // @desc Update a Board by ID
 const updateBoard = async (req, res) => {
     try {
-        const board = await Board.findById(req.params.id)
+        const board = await Board.findById(req.params.id);
         if (board) {
-            board.name = req.body.name || board.name
-            board.color = req.body.color || board.color
-            const updatedBoard = await board.save()
-            res.status(200).json(updatedBoard)
+            board.name = req.body.name || board.name;
+            board.color = req.body.color || board.color;
+            const updatedBoard = await board.save();
+            res.status(200).json(updatedBoard);
         } else {
-            res.status(404).json({ message: "Board not found" })
+            res.status(404).json({ message: "Board not found" });
         }
-
     } catch (err) {
-        console.log(err)
-        res.status(500).json({ message: "Server Error" })
+        console.log(err);
+        res.status(500).json({ message: "Server Error" });
     }
-}
+};
 
-//@desc Delete a Board by ID
+// @desc Delete a Board by ID
 const deleteBoard = async (req, res) => {
     try {
         const board = await Board.findById(req.params.id);
@@ -78,6 +78,8 @@ const deleteBoard = async (req, res) => {
                     await list.deleteOne();
                 }
                 await board.deleteOne();
+                await User.findByIdAndUpdate(board.user, { $pull: { boards: board._id } });
+
                 res.status(200).json({ message: "Board removed" });
             } else {
                 res.status(404).json({ message: "Lists not found" });
@@ -89,9 +91,9 @@ const deleteBoard = async (req, res) => {
         console.log(err);
         res.status(500).json({ message: "Server Error" });
     }
-}
+};
 
-//@desc Copy  a board
+// @desc Copy a board
 const copyBoard = async (req, res) => {
     try {
         const board = await Board.findById(req.params.id).populate('lists');
@@ -103,6 +105,7 @@ const copyBoard = async (req, res) => {
         const newBoard = new Board({
             name: `${board.name} (copy ${copyCount})`,
             color: board.color,
+            user: board.user,
             lists: []
         });
         await newBoard.save();
@@ -140,7 +143,7 @@ const copyBoard = async (req, res) => {
 const reorderLists = async (req, res) => {
     try {
         const { sourceIndex, destinationIndex } = req.body;
-        
+
         // Validate indexes
         if (sourceIndex === undefined || destinationIndex === undefined) {
             return res.status(400).json({ message: "Source and destination indices are required" });
@@ -158,7 +161,7 @@ const reorderLists = async (req, res) => {
 
         const [removedList] = list.splice(sourceIndex, 1);
         list.splice(destinationIndex, 0, removedList);
-        await list.save()
+        await list.save();
         await board.save();
         res.status(200).json(board);
     } catch (err) {
@@ -166,7 +169,6 @@ const reorderLists = async (req, res) => {
         res.status(500).json({ message: "Server Error" });
     }
 };
-
 
 const reorderCards = async (req, res) => {
     try {
@@ -201,4 +203,4 @@ const reorderCards = async (req, res) => {
     }
 };
 
-export { createBoard, getAllBoards, getBoardById, updateBoard, deleteBoard, copyBoard ,reorderLists,reorderCards} 
+export { createBoard, getAllBoards, getBoardById, updateBoard, deleteBoard, copyBoard, reorderLists, reorderCards };

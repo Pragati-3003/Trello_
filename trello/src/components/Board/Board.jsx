@@ -9,9 +9,18 @@ const Board = () => {
   const activeBoardId = useSelector(state => state.boardSlice.activeBoardId)
   useEffect(() => {
     const fetchBoards = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
       try {
-        const response = await axios.get(`http://localhost:8000/api/boards`);
-        setBoards(response.data);
+        const response = await axios.get(`http://localhost:8000/api/boards`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+         setBoards(response.data);
         const currentBoard = response.data.find(board => board._id === activeBoardId);
         setActiveBoard(currentBoard);
       } catch (err) {
