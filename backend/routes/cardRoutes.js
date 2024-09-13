@@ -11,7 +11,7 @@ router.get('/cards/:id',getCardById);
 router.get('/cards/card/:listId',getCardsByListId);
 router.put('/cards/:id',updateCard);
 router.delete('/cards/:id',deleteCard);
-router.post('/cards/:id',copyCard);
+router.post('/cards/:id/copy',copyCard);
 
 
 export default router

@@ -1,6 +1,7 @@
 import List from "../models/List.js"
 import Card from "../models/Card.js"
 import Board from '../models/Board.js'
+import mongoose from "mongoose";
 // @desc create a list
 
 const createCard = async (req, res) => {
@@ -86,22 +87,32 @@ const updateCard = async (req, res) => {
 const deleteCard = async (req, res) => {
     try {
         const card = await Card.findById(req.params.id);
-        if (!card)
+        if (!card) {
             return res.status(404).json({ message: "Card not found" });
-      const listcard =  await List.findById(card.listId);
-        listcard.cards = listcard.cards.filter((c) => c.toString() !== card._id.toString());
-        await listcard.save();
-        
+        }
+
+        const list = await List.findById(card.listId);
+        if (!list) {
+            return res.status(404).json({ message: "List not found" });
+        }
+
+        // Remove the card from the list's cards array
+        list.cards = list.cards.filter((c) => c.toString() !== card._id.toString());
+        await list.save();
+
+        // Delete the card from the database
         await card.deleteOne();
+
         res.json({ message: "Card removed" });
     } catch (error) {
         res.status(500).json({ message: "Server Error" });
-        console.log(error);
+        console.error(error);
     }
-}
+};
 
 //@desc copy  a card
 const copyCard = async (req, res) => {
+    const { destinationListId } = req.body;
     try {
         const card = await Card.findById(req.params.id);
         if (!card)
@@ -113,12 +124,12 @@ const copyCard = async (req, res) => {
         const newCard = new Card({
             name: `${card.name} (copy ${copyCount})`,
             description: card.description,
-            listId: card.listId,
+            listId: destinationListId || card.listId,
             boardId: card.boardId
         });
 
         const createdCard = await newCard.save();
-        await List.findByIdAndUpdate(card.listId,
+        await List.findByIdAndUpdate(destinationListId || card.listId, 
             { $push: { cards: createdCard._id } });
 
         res.status(201).json(createdCard);

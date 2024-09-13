@@ -1,62 +1,34 @@
-import React,{useEffect} from 'react'
+import React,{useEffect,useState} from 'react'
 import { MoreHorizontal, UserPlus, Edit2 } from 'react-feather'
-import { useDispatch, useSelector } from 'react-redux'
-import { updateBoard } from '../../store/boardSlice'
 import axios from 'axios'
 
-const Filter = () => {
-  const dispatch = useDispatch();
-  const activeBoardId = useSelector(state => state.boardSlice.activeBoardId);
+const Filter = ({ boardId }) => {
   const [isEditing, setIsEditing] = React.useState(false);
-  const [activeBoard, setActiveBoard] = React.useState(null);
-  const [name, setName] = React.useState(activeBoard?.name || '');
+  const [board, setBoard] = useState(null);
+  const [name, setName] = React.useState( '');
   
-  useEffect(()=>{
-    const fetchBoard=async()=>{
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('No token found');
-        return;
-      }
-
-         try{
-          const response = await axios.get(`http://localhost:8000/api/boards`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-           const currentBoard = response.data.find(board => board._id === activeBoardId);
-              setActiveBoard(currentBoard);
-              setName(currentBoard.name);
-         }catch(err){
-            console.error("Error in fetching boards",err);
-          }
-    }
-    fetchBoard();
-  },[])
-
   useEffect(() => {
-    const updateBoardName =async()=>{
+    const fetchBoard = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
         console.error('No token found');
         return;
       }
-      if (activeBoard) {
-    
-        const response = await axios.put(`http://localhost:8000/api/boards/${activeBoardId}`, {
-          name: name
-        }, {
+      try {
+        const response = await axios.get(`http://localhost:8000/api/boards/${boardId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-       console.log(response.data);
-           setName(activeBoard.name);
-    }
-    }
-    updateBoardName()
-  }, [activeBoard,setName]);
+        setBoard(response.data);
+        setName(response.data.name);
+      } catch (err) {
+        console.log("Error fetching board", err);
+      }
+    };
+    fetchBoard();
+  }, [boardId]);
+  
 
   const handleNameClick = () => {
     setIsEditing(true);
@@ -64,12 +36,28 @@ const Filter = () => {
   const handleNameChange =(e)=>{
     setName(e.target.value);
   }
-  const handleNameSubmit = (e) => {
-    e.preventDefault();
-    setIsEditing(false);
-    dispatch(updateBoard({ boardId: activeBoardId, name }));
-  }
-   if (!activeBoard) {
+  const handleNameSubmit = async (e) => {
+    e.preventDefault()
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
+    try {
+      const response = await axios.put(`http://localhost:8000/api/boards/${board._id}`, {
+        name: name
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      setName(response.data.name);
+      setIsEditing(false);
+    } catch (err) {
+      console.log("Error updating board name", err);
+    }
+  };
+   if (!board) {
     return <div className='p-3 bg-black flex justify-between w-full bg-opacity-50'>Board not found</div>;
   }
  
@@ -91,7 +79,7 @@ const Filter = () => {
          />
         </form>) : (<h2 className='text-white font-bold text-[20px]'
           onClick={handleNameClick}
-        >{activeBoard.name}</h2>)}
+        >{name}</h2>)}
 
         <div className='flex items-center justify-center'>
           <button className='bg-gray-200 h-8 text-gray-800 px-2 py-1 mr-2 rounded flex justify-center items-center'>
