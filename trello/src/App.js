@@ -29,10 +29,10 @@ function App() {
           </>
         ) : (
           <Routes>
+          <Route path='/' element={<Navigate to='/register' />} />
           <Route path='/register' element={<Register />} />
           <Route path='/login' element={<Login onLogin={() => setIsAuthenticated(true)} />} />
-          {/* <Route path='*' element={<Navigate to='/login' />} /> */}
-        </Routes>
+         </Routes>
         )}
       </>
     </Router>

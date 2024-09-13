@@ -140,67 +140,82 @@ const copyBoard = async (req, res) => {
     }
 };
 
-const reorderLists = async (req, res) => {
+
+
+// @desc Reorder lists within a board
+const reorderList = async (req, res) => {
+    const { boardId, sourceIndex, destinationIndex } = req.body;
+
     try {
-        const { sourceIndex, destinationIndex } = req.body;
+        console.log('Request body:', req.body);
 
-        // Validate indexes
-        if (sourceIndex === undefined || destinationIndex === undefined) {
-            return res.status(400).json({ message: "Source and destination indices are required" });
-        }
-
-        const board = await Board.findById(req.params.boardId);
-        const list = await List.find({ boardId: req.params.boardId });
+        const board = await Board.findById(boardId).populate('lists');
         if (!board) {
-            return res.status(404).json({ message: "Board not found" });
+            console.error('Board not found', { boardId });
+            return res.status(404).json({ message: 'Board not found' });
         }
 
-        if (sourceIndex < 0 || sourceIndex >= board.lists.length || destinationIndex < 0 || destinationIndex >= board.lists.length) {
-            return res.status(400).json({ message: "Invalid source or destination index" });
+        const lists = Array.from(board.lists);
+        // console.log("Before reordering: lists", lists);
+
+        if (sourceIndex < 0 || sourceIndex >= lists.length || destinationIndex < 0 || destinationIndex >= lists.length) {
+            return res.status(400).json({ message: 'Invalid source or destination index' });
         }
 
-        const [removedList] = list.splice(sourceIndex, 1);
-        list.splice(destinationIndex, 0, removedList);
-        await list.save();
+        const [removed] = board.lists.splice(sourceIndex, 1); 
+        board.lists.splice(destinationIndex, 0, removed); 
+
+
+        board.lists.forEach((list, index) => {
+            list.position = index;
+            list.save();
+          });
+        
         await board.save();
+         
         res.status(200).json(board);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Server Error" });
+        console.error('Error reordering lists:', err);
+        res.status(500).json({ message: 'Server Error' });
     }
 };
 
-const reorderCards = async (req, res) => {
+
+const moveCard = async (req, res) => {
+    const { sourceListId, destinationListId, sourceIndex, destinationIndex, cardId } = req.body;
+  
     try {
-        const { source, destination } = req.body;
-        const board = await Board.findById(req.params.boardId).populate({
-            path: 'lists',
-            populate: { path: 'cards' }
-        });
-
-        if (!board) {
-            return res.status(404).json({ message: "Board not found" });
-        }
-
-        const sourceList = board.lists.id(source.droppableId);
-        const destinationList = board.lists.id(destination.droppableId);
-
-        if (!sourceList || !destinationList) {
-            return res.status(400).json({ message: "Invalid source or destination list" });
-        }
-
-        const [movedCard] = sourceList.cards.splice(source.index, 1);
-        destinationList.cards.splice(destination.index, 0, movedCard);
-
+      const sourceList = await List.findById(sourceListId).populate('cards');
+      const destinationList = sourceListId === destinationListId 
+        ? sourceList 
+        : await List.findById(destinationListId).populate('cards');
+  
+      if (!sourceList || !destinationList) {
+        return res.status(404).json({ message: 'Source or destination list not found' });
+      }
+  
+      const sourceCards = Array.from(sourceList.cards);
+      const [removedCard] = sourceCards.splice(sourceIndex, 1);
+      if (sourceListId === destinationListId) {
+        sourceCards.splice(destinationIndex, 0, removedCard);
+        sourceList.cards = sourceCards.map(card => card._id);
+        await sourceList.save();
+      } else {
+       const destinationCards = Array.from(destinationList.cards);
+        destinationCards.splice(destinationIndex, 0, removedCard);
+        sourceList.cards = sourceCards.map(card => card._id);
+        destinationList.cards = destinationCards.map(card => card._id);
         await sourceList.save();
         await destinationList.save();
-        await board.save();
-
-        return res.status(200).json({ message: "Cards reordered successfully" });
+        const card = await Card.findById(cardId);
+        card.listId = destinationListId;
+        await card.save();
+      }
+  
+      res.status(200).json({ sourceList, destinationList });
     } catch (err) {
-        console.error('Error reordering cards:', err);
-        return res.status(500).json({ message: "Internal Server Error" });
+      res.status(500).json({ message: err.message });
     }
-};
-
-export { createBoard, getAllBoards, getBoardById, updateBoard, deleteBoard, copyBoard, reorderLists, reorderCards };
+  };
+  
+export { createBoard, getAllBoards, getBoardById, updateBoard, deleteBoard, copyBoard, reorderList, moveCard };

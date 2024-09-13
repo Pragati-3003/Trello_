@@ -3,6 +3,7 @@ import axios from 'axios';
 import AddNew from '../AddNew/AddNew';
 import { useSelector } from 'react-redux';
 import Card from '../Card/Card';
+import { Droppable, Draggable } from 'react-beautiful-dnd';
 import { MoreHorizontal } from 'react-feather';
 
 const List = () => {
@@ -15,13 +16,11 @@ const List = () => {
 
   useEffect(() => {
     const fetchlists = async () => {
-      
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('No token found');
-      return;
-    }
-
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
       try {
         const response = await axios.get(`http://localhost:8000/api/lists/${activeBoardId}`, {
           headers: {
@@ -34,7 +33,7 @@ const List = () => {
       }
     }
     fetchlists()
-  }, [boardLists])
+  }, [boardLists,activeBoardId])
 
   const handleCopyList = async (listId) => {
     const token = localStorage.getItem('token');
@@ -69,7 +68,7 @@ const List = () => {
             'Authorization': `Bearer ${token}`
           }
         });
-         console.log('list deleted', response.data);
+        console.log('list deleted', response.data);
         setBoardLists(boardLists.filter(list => list._id !== listId));
         setShowDeleteConfirmation(false);
         setShowOptions(null);
@@ -118,93 +117,113 @@ const List = () => {
     ));
   };
 
-
   return (
     <div className='flex flex-grow'>
+     
       {boardLists.map((list, index) => (
+     
+        <Draggable draggableId={list._id} index={index} key={list._id}>
+      
+          {(provided) => (
+            
+            <div
+              className="p-3 w-[300px]"
+              ref={provided.innerRef}
+              {...provided.draggableProps}
+              {...provided.dragHandleProps}
+            >
+              <div className="rounded-lg p-3 text-gray-100 bg-black max-h-[80vh] overflow-y-auto">
+                <div className="mb-4 font-medium flex justify-between items-center">
+                  {editingListId === list._id ? (
+                    <input
+                      type="text"
+                      value={newListName}
+                      onChange={handleListNameChange}
+                      onBlur={() => handleListNameUpdate(list._id)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleListNameUpdate(list._id);
+                        }
+                      }}
+                      className="bg-gray-800 text-white p-1 rounded"
+                      autoFocus
+                    />
+                  ) : (
+                    <span
+                      onClick={() => handleEditListName(list._id, list.name)}
+                      className="cursor-pointer"
+                    >
+                      {list.name}
+                    </span>
+                  )}
+                  <button
+                    onClick={() => setShowOptions(showOptions === list._id ? null : list._id)}
+                    title="List Options"
+                    className="text-gray-300 text-lg rounded-md h-7 w-7 hover:bg-zinc-600"
+                  >
+                    <MoreHorizontal />
+                  </button>
+                </div>
 
-        <div
-          className="p-3 w-[300px]" key={index}
-        >
-          <div className="rounded-lg p-3 text-gray-100 bg-black max-h-[80vh] overflow-y-auto">
-            <div className="mb-4 font-medium flex justify-between items-center">
-              {editingListId === list._id ? (
-                <input
-                  type="text"
-                  value={newListName}
-                  onChange={handleListNameChange}
-                  onBlur={() => handleListNameUpdate(list._id)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      handleListNameUpdate(list._id);
-                    }
-                  }}
-                  className="bg-gray-800 text-white p-1 rounded"
-                  autoFocus
-                />
-              ) : (
-                <span
-                  onClick={() => handleEditListName(list._id, list.name)}
-                  className="cursor-pointer"
-                >
-                  {list.name}
-                </span>
-              )}
-              <button
-                onClick={() => setShowOptions(showOptions === list._id ? null : list._id)}
-                title="List Options"
-                className="text-gray-300 text-lg rounded-md h-7 w-7 hover:bg-zinc-600"
-              >
-                <MoreHorizontal />
-              </button>
-            </div>
+                {showOptions === list._id && (
+                  <div className="  bg-zinc-800 text-white p-2 rounded-md shadow-lg">
+                    <button
+                      onClick={() => handleCopyList(list._id)}
+                      className="block w-full text-left p-2 hover:bg-zinc-600"
+                    >
+                      Copy List
+                    </button>
+                    <button
+                      onClick={() => handleDeleteList(list._id)}
+                      className="block w-full text-left p-2 hover:bg-zinc-600 text-red-500"
+                    >
+                      Delete List
+                    </button>
 
-            {showOptions === list._id && (
-              <div className="  bg-zinc-800 text-white p-2 rounded-md shadow-lg">
-                <button
-                  onClick={() => handleCopyList(list._id)}
-                  className="block w-full text-left p-2 hover:bg-zinc-600"
-                >
-                  Copy List
-                </button>
-                <button
-                  onClick={() => handleDeleteList(list._id)}
-                  className="block w-full text-left p-2 hover:bg-zinc-600 text-red-500"
-                >
-                  Delete List
-                </button>
+                  </div>
+                )}
 
+                <Droppable droppableId={list._id} type='card'>
+                  {(provided) => (
+               
+                    
+                    <div key={list._id} ref={provided.innerRef} {...provided.droppableProps}>
+                       {list?.cards?.length > 0 &&
+                        list.cards.map((card, cardIndex) => (
+                          <div
+                            className="card-container" key={card}
+                          > 
+                          {/* {console.log(card)} */}
+                            <Card
+                              cardInfo={{ ...card, listId: list._id, cardId: card, boardId: activeBoardId }}
+                              index={cardIndex}
+                              key={card}
+                              onCardDelete={handleCardDelete}
+                              provided={provided} // Pass the provided props to the Card component
+                            />
+                          </div>
+                        ))}
+                      {provided.placeholder}
+                    </div>
+
+                  )}
+                </Droppable>
+                <div className="mt-3">
+                  <AddNew type="card" parentId={list._id} boardId={activeBoardId} />
+                </div>
               </div>
-            )}
+              </div>
+          )}
+            </Draggable>
+          ))}
 
-
-            <div key={list._id} >
-
-              {list?.cards?.length > 0 &&
-                list.cards.map((card) => (
-                  <Card
-                    key={card}
-                    cardInfo={{ listId: list._id, cardId: card, boardId: activeBoardId }}
-                    index={card}
-                    onCardDelete={handleCardDelete} />
-                ))}
-            </div>
-
-
-            <div className="mt-3">
-              <AddNew type="card" parentId={list._id} boardId={activeBoardId} />
+          <div className='rounded-sm m-2 mt-4 w-[300px]'>
+            <div className='p-3 bg-black text-gray-100 rounded-md'>
+              <AddNew />
             </div>
           </div>
         </div>
-      ))}
-
-      <div className='rounded-sm m-2 mt-4 w-[300px]'>
-        <div className='p-3 bg-black text-gray-100 rounded-md'>
-          <AddNew />
-        </div>
-      </div>
-    </div>
-  );
+      );
 };
 
-export default List;
+      export default List;

@@ -152,7 +152,7 @@ const SideBar = () => {
   return (
     <div 
     style={{scrollbarColor: '#4B5563 #1F2937' }}
-    className={`bg-[#1d2125] overflow-y-scroll h-[92vh] text-gray-200 transition-all linear duration-500 flex-shrink-0 ${collapsed ? 'w-[42px]' : 'w-[280px]'}`}>
+    className={`bg-[#1d2125]  overflow-y-scroll h-[92vh] text-gray-200 transition-all linear duration-500 flex-shrink-0 ${collapsed ? 'w-[42px]' : 'w-[280px]'}`}>
       {collapsed && (
         <div className='p-2'>
           <button onClick={() => setCollapsed(!collapsed)} className='hover:bg-zinc-700 rounded-sm p-1'>

@@ -15,7 +15,8 @@ const listSchema = mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Card'
         }
-    ]
+    ],
+    position:Number
 }, { timestamps: true });
 
 const List   = mongoose.model('List',listSchema);
