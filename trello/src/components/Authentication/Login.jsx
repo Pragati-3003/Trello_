@@ -10,7 +10,7 @@ const Login = ({ onLogin }) => {
     const navigate = useNavigate();
 
     const loginUser = async (email, password) => {
-        const url = 'http://localhost:8000/api/auth/login';
+        const url = 'https://trello-backend-mcaz.onrender.com/api/auth/login';
         const data = { email, password };
 
         try {

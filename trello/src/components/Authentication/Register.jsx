@@ -11,7 +11,7 @@ const Register = () => {
     const navigate = useNavigate();
 
     const registerUser = async (username, email, password) => {
-        const url = 'http://localhost:8000/api/auth/register';
+        const url = 'https://trello-backend-mcaz.onrender.com/api/auth/register';
         const data = { username, email, password };
 
         try {

@@ -17,7 +17,7 @@ const Card = ({ cardInfo, index }) => {
         return;
       }
       try {
-        const res = await axios.get(`http://localhost:8000/api/cards/${cardId}`, {
+        const res = await axios.get(`https://trello-backend-mcaz.onrender.com/api/cards/${cardId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -47,7 +47,7 @@ const Card = ({ cardInfo, index }) => {
       return;
     }
     try {
-      await axios.put(`http://localhost:8000/api/cards/${cardId}`, { name, description }, {
+      await axios.put(`https://trello-backend-mcaz.onrender.com/api/cards/${cardId}`, { name, description }, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -70,7 +70,7 @@ const Card = ({ cardInfo, index }) => {
     }
     try {
       if (window.confirm("Are you sure you want to delete this card?")) {
-        await axios.delete(`http://localhost:8000/api/cards/${cardId}`, {
+        await axios.delete(`https://trello-backend-mcaz.onrender.com/api/cards/${cardId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -89,7 +89,7 @@ const Card = ({ cardInfo, index }) => {
       return;
     }
     try {
-      await axios.post(`http://localhost:8000/api/cards/${cardId}/copy`, {
+      await axios.post(`https://trello-backend-mcaz.onrender.com/api/cards/${cardId}/copy`, {
         destinationListId: listId
       }, {
         headers: {

@@ -36,7 +36,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://localhost:8000",
+  "proxy": "https://trello-backend-mcaz.onrender.com",
   "eslintConfig": {
     "extends": [
       "react-app",

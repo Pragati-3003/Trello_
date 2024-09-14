@@ -22,7 +22,7 @@ const List = () => {
         return;
       }
       try {
-        const response = await axios.get(`http://localhost:8000/api/lists/${activeBoardId}`, {
+        const response = await axios.get(`https://trello-backend-mcaz.onrender.com/api/lists/${activeBoardId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -43,7 +43,7 @@ const List = () => {
     }
 
     try {
-      const response = await axios.post(`http://localhost:8000/api/lists/${listId}`, {}, {
+      const response = await axios.post(`https://trello-backend-mcaz.onrender.com/api/lists/${listId}`, {}, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -63,7 +63,7 @@ const List = () => {
     }
     if (window.confirm("Are you sure you want to delete this board?")) {
       try {
-        const response = await axios.delete(`http://localhost:8000/api/lists/${listId}`, {
+        const response = await axios.delete(`https://trello-backend-mcaz.onrender.com/api/lists/${listId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -95,7 +95,7 @@ const List = () => {
       return;
     }
     try {
-      const response = await axios.put(`http://localhost:8000/api/lists/${listId}`, { name: newListName }, {
+      const response = await axios.put(`https://trello-backend-mcaz.onrender.com/api/lists/${listId}`, { name: newListName }, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

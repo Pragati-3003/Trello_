@@ -25,7 +25,7 @@ const AddNew = ({ type, parentId }) => {
 
     try {
       if (type) {
-        const res = await axios.post('http://localhost:8000/api/cards',
+        const res = await axios.post('https://trello-backend-mcaz.onrender.com/api/cards',
           { name: inputValue, listId: parentId, boardId: activeBoardId },{
             headers: {
               Authorization: `Bearer ${token}`
@@ -34,7 +34,7 @@ const AddNew = ({ type, parentId }) => {
         setInputValue("");
         setIsFormVisible(!isFormVisible)
       } else {
-        const res = await axios.post('http://localhost:8000/api/lists',
+        const res = await axios.post('https://trello-backend-mcaz.onrender.com/api/lists',
           { name: inputValue, boardId: activeBoardId },{
             headers: {
               Authorization: `Bearer ${token}`

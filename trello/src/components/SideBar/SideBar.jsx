@@ -23,7 +23,7 @@ const SideBar = () => {
         return;
       }
       try {
-        const response = await axios.get('http://localhost:8000/api/boards',{
+        const response = await axios.get('https://trello-backend-mcaz.onrender.com/api/boards',{
           headers: {
             'Authorization' : `Bearer ${token}`
           }
@@ -55,7 +55,7 @@ const SideBar = () => {
       return;
     }
     try {
-      await axios.put(`http://localhost:8000/api/boards/${boardId}`, {
+      await axios.put(`https://trello-backend-mcaz.onrender.com/api/boards/${boardId}`, {
         name: boardName,
         color: boardColor
       },{
@@ -83,7 +83,7 @@ const SideBar = () => {
       return;
     }
     try {
-      await axios.post('http://localhost:8000/api/boards', {
+      await axios.post('https://trello-backend-mcaz.onrender.com/api/boards', {
         name: boardName,
         color: boardColor || '#0079bf'
       },{
@@ -110,7 +110,7 @@ const SideBar = () => {
     }
     try {
     if (window.confirm("Are you sure you want to delete this board?")) {
-        await axios.delete(`http://localhost:8000/api/boards/${boardId}`,{
+        await axios.delete(`https://trello-backend-mcaz.onrender.com/api/boards/${boardId}`,{
           headers: {
             'Authorization' : `Bearer ${token}`
           }
@@ -135,7 +135,7 @@ const SideBar = () => {
     }
   
     try {
-      const response = await axios.post(`http://localhost:8000/api/boards/${board._id}`, {}, {
+      const response = await axios.post(`https://trello-backend-mcaz.onrender.com/api/boards/${board._id}`, {}, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
