@@ -100,7 +100,7 @@ const List = () => {
           'Authorization': `Bearer ${token}`
         }
       });
-      console.log('list name updated', response.data);
+      // console.log('list name updated', response.data);
       setBoardLists(boardLists.map(list => list._id === listId ? { ...list, name: newListName } : list));
       setEditingListId(null);
 
@@ -199,7 +199,7 @@ const List = () => {
                               index={cardIndex}
                               key={card}
                               onCardDelete={handleCardDelete}
-                              provided={provided} // Pass the provided props to the Card component
+                              provided={provided} 
                             />
                           </div>
                         ))}

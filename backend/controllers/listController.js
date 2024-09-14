@@ -62,11 +62,6 @@ const updateList = async (req, res) => {
         if (!list) {
             return res.status(404).json({ message: 'List not found' })
         }
-        if (boardId && boardId !== list.boardId.toString()) {
-            await Board.findByIdAndUpdate(list.boardId, { $pull: { lists: id } });
-            await Board.findByIdAndUpdate(boardId, { $push: { lists: id } });
-            list.boardId = boardId;
-        }
         list.name = name || list.name
         await list.save()
         res.status(200).json(list)
