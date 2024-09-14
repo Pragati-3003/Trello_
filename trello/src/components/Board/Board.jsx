@@ -18,7 +18,7 @@ const Board = () => {
         return;
       }
       try {
-        const response = await axios.get(`http://localhost:8000/api/boards`, {
+        const response = await axios.get(`https://trello-backend-mcaz.onrender.com/api/boards`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -38,7 +38,7 @@ const Board = () => {
         return;
       }
       try {
-        const response = await axios.get(`http://localhost:8000/api/lists/${activeBoard._id}`, {
+        const response = await axios.get(`https://trello-backend-mcaz.onrender.com/api/lists/${activeBoard._id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -82,7 +82,7 @@ const Board = () => {
 
     if (type === 'list') {
       try {
-        const response = await axios.put('http://localhost:8000/api/boards/reorderlists', {
+        const response = await axios.put('https://trello-backend-mcaz.onrender.com/api/boards/reorderlists', {
           boardId: activeBoard._id,
           sourceIndex: source.index,
           destinationIndex: destination.index
@@ -93,7 +93,7 @@ const Board = () => {
         });
 
         if (response.status === 200) {
-          const updatedBoardResponse = await axios.get(`http://localhost:8000/api/boards/${activeBoard._id}`, {
+          const updatedBoardResponse = await axios.get(`https://trello-backend-mcaz.onrender.com/api/boards/${activeBoard._id}`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -109,7 +109,7 @@ const Board = () => {
       }
     } else {
       try {
-        await axios.put('http://localhost:8000/api/boards/movecard', {
+        await axios.put('https://trello-backend-mcaz.onrender.com/api/boards/movecard', {
           sourceListId: source.droppableId,
           destinationListId: destination.droppableId,
           sourceIndex: source.index,
@@ -120,7 +120,7 @@ const Board = () => {
             'Authorization': `Bearer ${token}`
           }
         });
-        const updatedBoard = await axios.get(`http://localhost:8000/api/boards/${activeBoard._id}`, {
+        const updatedBoard = await axios.get(`https://trello-backend-mcaz.onrender.com/api/boards/${activeBoard._id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

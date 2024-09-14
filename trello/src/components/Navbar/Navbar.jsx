@@ -36,7 +36,7 @@ const Navbar = () => {
         }
 
         try {
-            await axios.post('http://localhost:8000/api/boards', {
+            await axios.post('https://trello-backend-mcaz.onrender.com/api/boards', {
                 name: boardName,
                 color: boardColor
             }, {

@@ -15,7 +15,7 @@ const Filter = ({ boardId }) => {
         return;
       }
       try {
-        const response = await axios.get(`http://localhost:8000/api/boards/${boardId}`, {
+        const response = await axios.get(`https://trello-backend-mcaz.onrender.com/api/boards/${boardId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -44,7 +44,7 @@ const Filter = ({ boardId }) => {
       return;
     }
     try {
-      const response = await axios.put(`http://localhost:8000/api/boards/${board._id}`, {
+      const response = await axios.put(`https://trello-backend-mcaz.onrender.com/api/boards/${board._id}`, {
         name: name
       }, {
         headers: {
