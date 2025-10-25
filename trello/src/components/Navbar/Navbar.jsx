@@ -67,7 +67,7 @@ const Navbar = () => {
                 <div className='flex items-center'>
 
                     <div>
-                        <h1 className='font-sans tracking-widest text-xl font-bold text-gray-300'>Trello</h1>
+                        <h1 className='font-sans tracking-widest text-xl font-bold text-gray-300'>Taskify</h1>
                     </div>
                     <ul className=' relative hidden md:flex space-x-4 ml-8 z-30'>
                         <li className=' z-30 decoration-transparent font-semibold hover:underline cursor-pointer' onClick={() => toggleSublist('Workshop')}>
